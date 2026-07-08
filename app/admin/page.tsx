@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
-
 import { AdminLogin } from "@/app/admin/_components/admin-login";
-import { getAdminEmail, bridgeToDetrSession } from "@/app/admin/_actions";
+import { DetrBoard } from "@/app/admin/_components/detr-board";
+import { getAdminEmail } from "@/app/admin/_actions";
 
 export const metadata = {
   title: "Sefaris admin",
@@ -10,20 +9,24 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
+interface AdminPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
 /**
- * /admin — premium Supabase-auth gate.
+ * /admin — premium Supabase-auth gate + task board.
  *
  * - Not signed in (or email not allowlisted) → premium login.
- * - Signed-in allowed admin → mint the DETR board session and hand off to
- *   /detr, which renders the full task board + updates.
+ * - Signed-in allowed admin → renders the board (Güncellemeler first,
+ *   then the task list) directly under /admin.
  */
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: AdminPageProps) {
   const email = await getAdminEmail();
 
   if (!email) {
     return <AdminLogin />;
   }
 
-  await bridgeToDetrSession();
-  redirect("/detr");
+  const params = searchParams ? await searchParams : {};
+  return <DetrBoard sessionEmail={email} searchParams={params} />;
 }

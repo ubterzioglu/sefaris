@@ -1,5 +1,5 @@
-import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/detr/_components/theme";
-import { DETR_UPDATES } from "@/app/detr/_updates";
+import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/admin/_components/theme";
+import { DETR_UPDATES } from "@/app/admin/_components/updates";
 
 const UPDATE_DATE_FORMAT = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
@@ -18,7 +18,7 @@ function formatUpdateDate(date: string): string {
 
 /**
  * Hard-coded "Güncellemeler" section — a collapsible glass card matching the
- * DETR board style, listing changelog entries newest-first from _updates.ts.
+ * admin board style, listing changelog entries newest-first from updates.ts.
  */
 export function DetrUpdatesSection() {
   const updates = DETR_UPDATES;

@@ -1,7 +1,5 @@
 /**
- * DETR todo-board theme tokens. Palette: black (1) · orange (2) · rose (3),
- * with white text. Scoped to the `/detr` route so it never touches the global
- * site theme.
+ * Admin panel theme tokens. Palette: black · orange · rose, white text.
  */
 
 /** Core accent hexes (kept as named constants so JSX can reference them). */

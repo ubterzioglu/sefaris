@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/detr/_components/theme";
+import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/admin/_components/theme";
 
 export const metadata = {
   title: "404 · Sefaris",

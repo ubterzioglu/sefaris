@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/detr/_components/theme";
+import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/admin/_components/theme";
 
 /**
  * Premium abstract video panel for the login split-screen (left column).

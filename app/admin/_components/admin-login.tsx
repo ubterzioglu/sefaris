@@ -8,7 +8,7 @@ import {
   DETR_BRAND_GRADIENT,
   DETR_GRID_TEXTURE,
   DETR_ORANGE
-} from "@/app/detr/_components/theme";
+} from "@/app/admin/_components/theme";
 
 type Mode = "signin" | "signup";
 

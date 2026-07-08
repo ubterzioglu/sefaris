@@ -1,14 +1,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { getDetrSessionEmail, isDetrAuthenticated } from "@/lib/detr-auth";
-import { DetrLogin } from "@/app/detr/_components/detr-login";
-import { DetrUpdatesSection } from "@/app/detr/_components/updates-section";
-import { detrSignInAction, detrSignOutAction } from "@/app/detr/_actions";
-import {
-  DETR_BRAND_GRADIENT,
-  DETR_ORANGE
-} from "@/app/detr/_components/theme";
+import { getAdminEmail } from "@/app/admin/_actions";
+import { adminSignOutAction } from "@/app/admin/_actions";
+import { DetrUpdatesSection } from "@/app/admin/_components/updates-section";
+import { DETR_BRAND_GRADIENT, DETR_ORANGE } from "@/app/admin/_components/theme";
 import {
   getAllDetrTodosAdmin,
   getDetrTodoByIdAdmin,
@@ -23,15 +19,9 @@ import {
 } from "@/lib/detr-todos";
 import type { DetrTodoItem } from "@/lib/detr-todos";
 
-export const metadata = {
-  title: "DETR admin · Görev Panosu",
-  robots: { index: false, follow: false }
-};
-
-export const dynamic = "force-dynamic";
-
-interface DetrPageProps {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+interface DetrBoardProps {
+  sessionEmail: string;
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
 function readParam(value: string | string[] | undefined): string {
@@ -88,13 +78,15 @@ function todayInBerlin(): string {
   }).format(new Date());
 }
 
-export default async function DetrPage({ searchParams }: DetrPageProps) {
-  const params = searchParams ? await searchParams : {};
-  const sessionEmail = await getDetrSessionEmail();
-
-  if (!sessionEmail) {
-    return <DetrLogin signIn={detrSignInAction} />;
+/** Guard: re-check the admin session inside every mutation. */
+async function requireAdmin(): Promise<void> {
+  if (!(await getAdminEmail())) {
+    redirect("/admin");
   }
+}
+
+export async function DetrBoard({ sessionEmail, searchParams }: DetrBoardProps) {
+  const params = searchParams ?? {};
 
   const result = await getAllDetrTodosAdmin();
   const createdParam = readParam(params.created);
@@ -111,15 +103,12 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
 
   async function createAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const outcome = await createDetrTodo({
       title: (formData.get("title") as string | null) ?? "",
       assignee: (formData.get("assignee") as string | null) ?? "",
       dueDate: (formData.get("dueDate") as string | null) ?? ""
     });
-    // Optional attachment uploaded right after the todo row exists.
     let attachError: string | null = null;
     const file = formData.get("file");
     if (outcome.ok && outcome.id && file instanceof File && file.size > 0) {
@@ -128,75 +117,67 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
         attachError = attached.errorMessage ?? "Dosya yüklenemedi.";
       }
     }
-    revalidatePath("/detr");
+    revalidatePath("/admin");
     redirect(
       outcome.ok
         ? attachError
-          ? `/detr?created=1&error=${encodeURIComponent(`Görev eklendi ama dosya yüklenemedi: ${attachError}`)}`
-          : "/detr?created=1"
-        : `/detr?error=${encodeURIComponent(outcome.errorMessage ?? "Görev eklenemedi.")}`
+          ? `/admin?created=1&error=${encodeURIComponent(`Görev eklendi ama dosya yüklenemedi: ${attachError}`)}`
+          : "/admin?created=1"
+        : `/admin?error=${encodeURIComponent(outcome.errorMessage ?? "Görev eklenemedi.")}`
     );
   }
 
   async function attachAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const todoId = (formData.get("todoId") as string | null) ?? "";
     const file = formData.get("file");
     if (!todoId || !(file instanceof File) || file.size === 0) {
-      redirect("/detr");
+      redirect("/admin");
     }
     const outcome = await addDetrAttachment(todoId, file as File);
-    revalidatePath("/detr");
+    revalidatePath("/admin");
     redirect(
       outcome.ok
-        ? "/detr?attached=1"
-        : `/detr?error=${encodeURIComponent(outcome.errorMessage ?? "Dosya yüklenemedi.")}`
+        ? "/admin?attached=1"
+        : `/admin?error=${encodeURIComponent(outcome.errorMessage ?? "Dosya yüklenemedi.")}`
     );
   }
 
   async function deleteAttachmentAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const attachmentId = (formData.get("attachmentId") as string | null) ?? "";
     if (attachmentId) {
       await deleteDetrAttachment(attachmentId);
     }
-    revalidatePath("/detr");
-    redirect("/detr");
+    revalidatePath("/admin");
+    redirect("/admin");
   }
 
   async function updateAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const id = (formData.get("id") as string | null) ?? "";
     if (!id) {
-      redirect("/detr");
+      redirect("/admin");
     }
     const outcome = await updateDetrTodo(id, {
       title: (formData.get("title") as string | null) ?? "",
       assignee: (formData.get("assignee") as string | null) ?? "",
       dueDate: (formData.get("dueDate") as string | null) ?? ""
     });
-    revalidatePath("/detr");
+    revalidatePath("/admin");
     redirect(
       outcome.ok
-        ? "/detr?updated=1"
-        : `/detr?error=${encodeURIComponent(outcome.errorMessage ?? "Görev güncellenemedi.")}`
+        ? "/admin?updated=1"
+        : `/admin?error=${encodeURIComponent(outcome.errorMessage ?? "Görev güncellenemedi.")}`
     );
   }
 
   async function toggleAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const id = (formData.get("id") as string | null) ?? "";
     const next =
       ((formData.get("next") as string | null) ?? "open") === "done"
@@ -205,54 +186,48 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
     if (id) {
       await setDetrTodoStatus(id, next);
     }
-    revalidatePath("/detr");
-    redirect("/detr");
+    revalidatePath("/admin");
+    redirect("/admin");
   }
 
   async function deleteAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const id = (formData.get("id") as string | null) ?? "";
     if (id) {
       await deleteDetrTodo(id);
     }
-    revalidatePath("/detr");
-    redirect("/detr?deleted=1");
+    revalidatePath("/admin");
+    redirect("/admin?deleted=1");
   }
 
   async function commentAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const todoId = (formData.get("todoId") as string | null) ?? "";
     const body = (formData.get("body") as string | null) ?? "";
     const author = (formData.get("author") as string | null) ?? "";
     if (!todoId) {
-      redirect("/detr");
+      redirect("/admin");
     }
     const outcome = await addDetrComment(todoId, body, author);
-    revalidatePath("/detr");
+    revalidatePath("/admin");
     redirect(
       outcome.ok
-        ? "/detr?commented=1"
-        : `/detr?error=${encodeURIComponent(outcome.errorMessage ?? "Yorum eklenemedi.")}`
+        ? "/admin?commented=1"
+        : `/admin?error=${encodeURIComponent(outcome.errorMessage ?? "Yorum eklenemedi.")}`
     );
   }
 
   async function deleteCommentAction(formData: FormData) {
     "use server";
-    if (!(await isDetrAuthenticated())) {
-      redirect("/detr");
-    }
+    await requireAdmin();
     const commentId = (formData.get("commentId") as string | null) ?? "";
     if (commentId) {
       await deleteDetrComment(commentId);
     }
-    revalidatePath("/detr");
-    redirect("/detr");
+    revalidatePath("/admin");
+    redirect("/admin");
   }
 
   const todos = result.items;
@@ -263,7 +238,6 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
     (item) => item.status === "open" && item.dueDate !== null && item.dueDate < today
   ).length;
 
-  // Open the add-form accordion automatically only while editing a record.
   const formOpen = Boolean(editing);
 
   return (
@@ -304,7 +278,7 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
                 style={{ backgroundImage: DETR_BRAND_GRADIENT }}
               >
                 <span className="text-sm font-extrabold tracking-tight text-black">
-                  D
+                  S
                 </span>
               </span>
               <div>
@@ -312,7 +286,7 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
                   className="text-[10px] font-semibold uppercase tracking-[0.28em]"
                   style={{ color: DETR_ORANGE }}
                 >
-                  DETR admin
+                  Sefaris admin
                 </p>
                 <h1 className="text-[clamp(1.2rem,3vw,1.6rem)] font-bold tracking-[-0.03em] text-white">
                   Görev panosu
@@ -326,7 +300,7 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
               >
                 {sessionEmail}
               </span>
-              <form action={detrSignOutAction}>
+              <form action={adminSignOutAction}>
                 <button
                   type="submit"
                   className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[13px] font-semibold text-white/80 transition hover:border-rose-400/40 hover:text-rose-300"
@@ -381,6 +355,9 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
           </div>
         )}
 
+        {/* Güncellemeler — hard-coded changelog section (FIRST) */}
+        <DetrUpdatesSection />
+
         {/* Stats */}
         <section className="grid gap-3 grid-cols-2 sm:grid-cols-4">
           {[
@@ -406,9 +383,6 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
           ))}
         </section>
 
-        {/* Güncellemeler — hard-coded changelog section */}
-        <DetrUpdatesSection />
-
         {/* Add / edit form — collapsed-by-default accordion; "Düzenle" opens it */}
         <details
           open={formOpen}
@@ -427,7 +401,7 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
             <span className="flex items-center gap-3">
               {editing ? (
                 <a
-                  href="/detr"
+                  href="/admin"
                   className="text-[13px] font-semibold"
                   style={{ color: DETR_ORANGE }}
                 >
@@ -559,10 +533,6 @@ function formatFileSize(bytes: number): string {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-/**
- * One todo card: status toggle, title, kim/ne-zamana-kadar/ne-zaman-yazıldı
- * badges, edit/delete actions and a collapsible comment thread below.
- */
 function TodoRow({
   item,
   today,
@@ -584,7 +554,6 @@ function TodoRow({
       }`}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:flex-nowrap">
-        {/* 1) Status toggle */}
         <form action={toggleAction} className="shrink-0">
           <input type="hidden" name="id" value={item.id} />
           <input type="hidden" name="next" value={isDone ? "open" : "done"} />
@@ -601,7 +570,6 @@ function TodoRow({
           </button>
         </form>
 
-        {/* 2) Title — primary, takes remaining width */}
         <span
           className={`min-w-0 flex-1 truncate text-[14px] font-semibold ${
             isDone ? "text-white/40 line-through" : "text-white"
@@ -611,7 +579,6 @@ function TodoRow({
           {item.title}
         </span>
 
-        {/* 3) Kim */}
         <span
           className="inline-flex max-w-[140px] shrink-0 items-center truncate rounded-full border border-orange-400/30 bg-orange-400/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-orange-300"
           title={`Sorumlu: ${item.assignee}`}
@@ -619,7 +586,6 @@ function TodoRow({
           {item.assignee}
         </span>
 
-        {/* 4) Ne zamana kadar */}
         <span
           className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] ${
             isOverdue
@@ -639,7 +605,6 @@ function TodoRow({
             : "tarih —"}
         </span>
 
-        {/* 5) Ne zaman yazıldı (hidden on small screens) */}
         <span
           className="hidden shrink-0 text-[11px] text-white/40 lg:inline"
           title={`Yazıldı: ${formatTimestamp(item.createdAt)}`}
@@ -647,10 +612,9 @@ function TodoRow({
           {formatTimestamp(item.createdAt)}
         </span>
 
-        {/* 6) Actions */}
         <div className="flex shrink-0 items-center gap-1.5">
           <a
-            href={`/detr?edit=${item.id}`}
+            href={`/admin?edit=${item.id}`}
             className="inline-flex min-h-[30px] items-center justify-center rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-white/80 transition hover:border-[#FB923C]/40 hover:text-[#FB923C]"
           >
             Düzenle
