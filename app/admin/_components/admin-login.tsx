@@ -90,10 +90,15 @@ export function AdminLogin() {
     "w-full rounded-[1.05rem] border border-white/10 bg-white/[0.04] py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] outline-none transition focus:border-[#FB923C]/60 focus:bg-white/[0.06] focus:ring-4 focus:ring-[#FB923C]/15";
 
   return (
-    <main
-      className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-10 sm:px-6"
-      style={{ background: DETR_AMBIENT_BACKGROUND }}
-    >
+    <main className="relative isolate grid min-h-screen grid-cols-1 overflow-hidden lg:grid-cols-2">
+      {/* Left: premium abstract video panel (hidden on small screens) */}
+      <LoginVideoPanel />
+
+      {/* Right: form column */}
+      <div
+        className="relative flex items-center justify-center overflow-hidden px-4 py-10 sm:px-6"
+        style={{ background: DETR_AMBIENT_BACKGROUND }}
+      >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 opacity-[0.4]"
@@ -296,6 +301,7 @@ export function AdminLogin() {
             sefaris.site · internal
           </p>
         </div>
+      </div>
       </div>
     </main>
   );

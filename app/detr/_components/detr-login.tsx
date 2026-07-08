@@ -1,3 +1,4 @@
+import { LoginVideoPanel } from "@/app/admin/_components/login-video-panel";
 import {
   DETR_AMBIENT_BACKGROUND,
   DETR_BRAND_GRADIENT,
@@ -16,10 +17,15 @@ interface DetrLoginProps {
  */
 export function DetrLogin({ signIn }: DetrLoginProps) {
   return (
-    <main
-      className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-10 sm:px-6"
-      style={{ background: DETR_AMBIENT_BACKGROUND }}
-    >
+    <main className="relative isolate grid min-h-screen grid-cols-1 overflow-hidden lg:grid-cols-2">
+      {/* Left: premium abstract video panel */}
+      <LoginVideoPanel />
+
+      {/* Right: form column */}
+      <div
+        className="relative flex items-center justify-center overflow-hidden px-4 py-10 sm:px-6"
+        style={{ background: DETR_AMBIENT_BACKGROUND }}
+      >
       {/* Grid texture */}
       <div
         aria-hidden
@@ -215,6 +221,7 @@ export function DetrLogin({ signIn }: DetrLoginProps) {
             sefaris.site · internal
           </p>
         </div>
+      </div>
       </div>
     </main>
   );
