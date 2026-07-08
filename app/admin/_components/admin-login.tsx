@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabaseBrowser";
+import { LoginVideoPanel } from "@/app/admin/_components/login-video-panel";
 import {
   DETR_AMBIENT_BACKGROUND,
   DETR_BRAND_GRADIENT,
