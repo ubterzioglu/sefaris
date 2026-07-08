@@ -39,6 +39,8 @@ export async function getAdminEmail(): Promise<string | null> {
 /** Signs out of Supabase and returns to the login. */
 export async function adminSignOutAction(): Promise<void> {
   const supabase = await createSupabaseServer();
-  await supabase.auth.signOut();
+  if (supabase) {
+    await supabase.auth.signOut();
+  }
   redirect("/admin");
 }

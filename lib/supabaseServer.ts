@@ -12,13 +12,17 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
  * PUBLISHABLE key (never service-role). Session cookies are refreshed here and
  * in middleware.
  */
-export async function createSupabaseServer(): Promise<SupabaseClient> {
-  const cookieStore = await cookies();
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+export async function createSupabaseServer(): Promise<SupabaseClient | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Env not configured (e.g. missing on the host) — don't crash the server
+  // component; callers treat null as "no session".
+  if (!url || !key) return null;
+
+  const cookieStore = await cookies();
 
   return createServerClient(url, key, {
     cookies: {
@@ -45,8 +49,13 @@ export async function createSupabaseServer(): Promise<SupabaseClient> {
  */
 export async function getAuthedEmail(): Promise<string | null> {
   const supabase = await createSupabaseServer();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  return user?.email?.toLowerCase() ?? null;
+  if (!supabase) return null;
+  try {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    return user?.email?.toLowerCase() ?? null;
+  } catch {
+    return null;
+  }
 }
