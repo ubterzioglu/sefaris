@@ -28,6 +28,7 @@ function getAllowedEmails(): string[] {
     "ubterzioglu@gmail.com",
     "ozbakirsahincande@gmail.com",
     "fatmacinaryalcin@hotmail.com",
+    "muratberatbasari@gmail.com",
     "admin@admin.com"
   ];
   const list = raw ? raw.split(",") : fallback;
