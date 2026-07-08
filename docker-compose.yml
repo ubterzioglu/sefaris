@@ -1,0 +1,19 @@
+# Local test of the production image. Coolify does not need this file —
+# it builds the Dockerfile directly. Useful for `docker compose up --build`.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SUBSCRIBERS_PATH=/data/subscribers.json
+      # - NEXT_PUBLIC_LAUNCH_DATE=2026-08-01T09:00:00Z
+    volumes:
+      - subscribers:/data
+    restart: unless-stopped
+
+volumes:
+  subscribers:
