@@ -20,6 +20,8 @@ export default {
         aurora: "aurora 18s ease-in-out infinite",
         "aurora-slow": "aurora 26s ease-in-out infinite reverse",
         float: "float 7s ease-in-out infinite",
+        drift: "drift 9s ease-in-out infinite",
+        reveal: "reveal 0.6s ease-out both",
         "fade-up": "fadeUp 0.8s ease-out both",
         shimmer: "shimmer 3s linear infinite",
       },
@@ -32,6 +34,14 @@ export default {
         float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
+        },
+        drift: {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "50%": { transform: "translate(-14px, 12px)" },
+        },
+        reveal: {
+          from: { opacity: "0", transform: "translateY(18px) scale(0.98)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
         },
         fadeUp: {
           from: { opacity: "0", transform: "translateY(16px)" },

@@ -2,28 +2,29 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { isValidEmail, normalizeEmail } from "@/lib/validateEmail";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Where subscribers are persisted. In Coolify, mount a persistent volume at /data.
+// File fallback used only when Supabase env vars are absent (local/dev).
 const SUBSCRIBERS_PATH =
-  process.env.SUBSCRIBERS_PATH || path.join(process.cwd(), "data", "subscribers.json");
+  process.env.SUBSCRIBERS_PATH ||
+  path.join(process.cwd(), "data", "subscribers.json");
 
 type Subscriber = { email: string; ts: string };
 
-async function readSubscribers(): Promise<Subscriber[]> {
+async function persistToFile(email: string): Promise<void> {
+  let list: Subscriber[] = [];
   try {
     const raw = await fs.readFile(SUBSCRIBERS_PATH, "utf8");
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) list = parsed;
   } catch {
-    // Missing file or invalid JSON -> start fresh.
-    return [];
+    // missing/invalid -> start fresh
   }
-}
-
-async function writeSubscribers(list: Subscriber[]): Promise<void> {
+  if (list.some((s) => s.email === email)) return;
+  list.push({ email, ts: new Date().toISOString() });
   await fs.mkdir(path.dirname(SUBSCRIBERS_PATH), { recursive: true });
   await fs.writeFile(SUBSCRIBERS_PATH, JSON.stringify(list, null, 2), "utf8");
 }
@@ -48,19 +49,34 @@ export async function POST(request: Request) {
   }
 
   const normalized = normalizeEmail(email);
+  const supabase = getSupabaseAdmin();
 
-  try {
-    const list = await readSubscribers();
-    if (list.some((s) => s.email === normalized)) {
-      // Idempotent success — don't leak that the email already exists as an error.
+  // Primary path: Supabase.
+  if (supabase) {
+    const { error } = await supabase
+      .from("subscribers")
+      .insert({ email: normalized, source: "coming-soon" });
+
+    if (!error) {
+      return NextResponse.json({ success: true });
+    }
+
+    // 23505 = unique_violation -> already subscribed, treat as success.
+    if (error.code === "23505") {
       return NextResponse.json({ success: true, already: true });
     }
-    list.push({ email: normalized, ts: new Date().toISOString() });
-    await writeSubscribers(list);
-    return NextResponse.json({ success: true });
+
+    // Unexpected DB error: log and fall through to file fallback so we
+    // never lose a signup.
+    console.error("[subscribe] supabase insert failed:", error.message);
+  }
+
+  // Fallback path: file store.
+  try {
+    await persistToFile(normalized);
+    return NextResponse.json({ success: true, degraded: !supabase });
   } catch (err) {
-    // Fail-soft: never lose the signup silently — log it, still confirm to the user.
-    console.error("[subscribe] persistence failed:", err);
+    console.error("[subscribe] file persistence failed:", err);
     console.info("[subscribe] captured (unpersisted):", normalized);
     return NextResponse.json({ success: true, degraded: true });
   }

@@ -26,6 +26,9 @@ yarn-error.log*
 # env files
 .env
 .env*.local
+.env.ubt
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
