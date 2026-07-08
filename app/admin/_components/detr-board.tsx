@@ -300,6 +300,28 @@ export async function DetrBoard({ sessionEmail, searchParams }: DetrBoardProps) 
               >
                 {sessionEmail}
               </span>
+              <a
+                href="/sefaris-rehber.md"
+                download="sefaris-rehber.md"
+                className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[13px] font-semibold text-white/80 transition hover:border-[#FB923C]/40 hover:text-[#FB923C]"
+                title="Genel bilgi rehberini indir (.md)"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Rehber
+              </a>
               <form action={adminSignOutAction}>
                 <button
                   type="submit"
