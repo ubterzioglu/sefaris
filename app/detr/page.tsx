@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getDetrSessionEmail, isDetrAuthenticated } from "@/lib/detr-auth";
 import { DetrLogin } from "@/app/detr/_components/detr-login";
+import { DetrUpdatesSection } from "@/app/detr/_components/updates-section";
 import { detrSignInAction, detrSignOutAction } from "@/app/detr/_actions";
 import {
   DETR_BRAND_GRADIENT,
@@ -23,7 +24,7 @@ import {
 import type { DetrTodoItem } from "@/lib/detr-todos";
 
 export const metadata = {
-  title: "DETR · Görev Panosu",
+  title: "DETR admin · Görev Panosu",
   robots: { index: false, follow: false }
 };
 
@@ -311,7 +312,7 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
                   className="text-[10px] font-semibold uppercase tracking-[0.28em]"
                   style={{ color: DETR_ORANGE }}
                 >
-                  DETR
+                  DETR admin
                 </p>
                 <h1 className="text-[clamp(1.2rem,3vw,1.6rem)] font-bold tracking-[-0.03em] text-white">
                   Görev panosu
@@ -404,6 +405,9 @@ export default async function DetrPage({ searchParams }: DetrPageProps) {
             </article>
           ))}
         </section>
+
+        {/* Güncellemeler — hard-coded changelog section */}
+        <DetrUpdatesSection />
 
         {/* Add / edit form — collapsed-by-default accordion; "Düzenle" opens it */}
         <details

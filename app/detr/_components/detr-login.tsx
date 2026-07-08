@@ -57,7 +57,7 @@ export function DetrLogin({ signIn }: DetrLoginProps) {
               </span>
               <div className="leading-tight">
                 <p className="text-sm font-bold tracking-tight text-white">
-                  DETR
+                  DETR admin
                 </p>
                 <p className="text-[11px] font-medium text-white/45">
                   Görev Panosu
@@ -94,7 +94,7 @@ export function DetrLogin({ signIn }: DetrLoginProps) {
             Yönetim erişimi
           </p>
           <h1 className="mt-3 text-[clamp(1.55rem,4vw,2rem)] font-bold leading-[1.08] tracking-[-0.035em] text-white">
-            DETR görev panosu
+            DETR admin panosu
           </h1>
           <p className="mt-3 text-[13px] leading-6 text-white/55">
             Görevleri, sorumluları ve teslim tarihlerini bu özel pano üzerinden
