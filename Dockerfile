@@ -9,15 +9,23 @@ WORKDIR /app
 # ---- Dependencies ----
 FROM base AS deps
 COPY package.json package-lock.json* ./
-# Use a clean, reproducible install; fall back to install if no lockfile.
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+# BuildKit cache mount keeps the npm cache warm across builds, so repeat
+# installs are near-instant. --no-audit/--no-fund skip slow network calls.
+RUN --mount=type=cache,target=/root/.npm \
+  if [ -f package-lock.json ]; then \
+    npm ci --prefer-offline --no-audit --no-fund; \
+  else \
+    npm install --no-audit --no-fund; \
+  fi
 
 # ---- Builder ----
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+ENV NODE_ENV=production
+# Cache the Next.js build cache across builds to speed up recompiles.
+RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 # ---- Runner ----
 FROM base AS runner
