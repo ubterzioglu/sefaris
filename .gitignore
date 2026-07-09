@@ -46,3 +46,8 @@ yarn-error.log*
 
 # omc state
 /.omc
+
+# çalışma zamanı logları
+*.log
+backend/app.log
+frontend/fe.log
