@@ -54,8 +54,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 USER nextjs
 EXPOSE 3000
 
-# Container-level healthcheck (Coolify also has its own).
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+# Container-level healthcheck (Coolify also has its own). Next.js standalone
+# saniyeler içinde açılır → kısa start-period + sık kontrol = hızlı "healthy".
+HEALTHCHECK --interval=10s --timeout=5s --start-period=8s --retries=5 \
   CMD node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["node", "server.js"]

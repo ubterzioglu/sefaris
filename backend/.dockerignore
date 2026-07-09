@@ -1,0 +1,12 @@
+# Build context'i küçült → daha hızlı context transferi + isabetli katman cache.
+target
+.git
+.gitignore
+*.md
+.env
+.env*
+Dockerfile
+.dockerignore
+.idea
+*.iml
+.vscode
