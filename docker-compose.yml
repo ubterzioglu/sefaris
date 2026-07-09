@@ -1,19 +1,80 @@
-# Local test of the production image. Coolify does not need this file —
-# it builds the Dockerfile directly. Useful for `docker compose up --build`.
+# Sefaris tam yığın — yerel geliştirme / prod imaj testi (rehber bölüm 19).
+# frontend + backend + postgres + redis + minio.
 services:
-  web:
+  frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - SUBSCRIBERS_PATH=/data/subscribers.json
-      # - NEXT_PUBLIC_LAUNCH_DATE=2026-08-01T09:00:00Z
-    volumes:
-      - subscribers:/data
+    depends_on:
+      - backend
     restart: unless-stopped
+    networks: [sefaris-network]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DATABASE_URL: jdbc:postgresql://db:5432/sefaris_db
+      DATABASE_USER: sefaris
+      DATABASE_PASSWORD: ${DB_PASSWORD:-sefaris}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-prod-256-bit-secret-key-0123456789abcd}
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      S3_ENABLED: "true"
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: sefaris-documents
+      EMAIL_ENABLED: "false"
+    depends_on:
+      - db
+      - redis
+      - minio
+    restart: unless-stopped
+    networks: [sefaris-network]
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sefaris_db
+      POSTGRES_USER: sefaris
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sefaris}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [sefaris-network]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks: [sefaris-network]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    networks: [sefaris-network]
 
 volumes:
-  subscribers:
+  postgres-data:
+  minio-data:
+
+networks:
+  sefaris-network:
+    driver: bridge

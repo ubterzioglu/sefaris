@@ -22,6 +22,9 @@ RUN --mount=type=cache,target=/root/.npm \
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Backend API adresi build sırasında gömülür (NEXT_PUBLIC_*).
+ARG NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 # Cache the Next.js build cache across builds to speed up recompiles.

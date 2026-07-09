@@ -2,50 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Sefaris tasarım sistemi — CSS değişkenleri (rehber bölüm 12.1) */
 :root {
   --font-geist-sans: "Geist", system-ui, sans-serif;
   --font-geist-mono: "Geist Mono", monospace;
+
+  --color-primary: #0f172a;
+  --color-primary-light: #1e293b;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-accent-light: #dbeafe;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #06b6d4;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
 }
 
 html,
 body {
-  background: #05060a;
-  color: #e7e9ee;
   min-height: 100%;
 }
 
 body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
   overflow-x: hidden;
 }
 
-/* Subtle noise/grain overlay for depth */
-.grain::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* Gradient text used for the wordmark + accents */
+/* Kurumsal wordmark / vurgu gradyanı */
 .gradient-text {
-  background: linear-gradient(120deg, #a5b4fc 0%, #22d3ee 45%, #818cf8 100%);
+  background: linear-gradient(120deg, #3b82f6 0%, #06b6d4 50%, #6366f1 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 6s linear infinite;
 }
 
-@keyframes shimmer {
-  to {
-    background-position: -200% center;
-  }
+/* Koyu hero video bileşeni kendi arka planını yönetir */
+.hero-dark {
+  background: #05060a;
+  color: #e7e9ee;
 }
 
-/* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

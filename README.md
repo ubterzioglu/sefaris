@@ -1,80 +1,63 @@
-# Sefaris — Coming Soon
+# Sefaris — Kurumsal Web Sitesi & Yönetim Paneli
 
-A tech-forward "coming soon" landing page for **[sefaris.site](https://sefaris.site)**, built with Next.js 15 (App Router), React 19, TypeScript, and Tailwind CSS. Containerized for one-click deployment on **Coolify**.
+Türkiye ve Almanya (DACH) arasında yazılım geliştirme, dijital dönüşüm ve IT
+danışmanlığı sunan proje ortaklığı platformu. `sefarislast.md` (v4.0.0) mimari
+rehberine göre inşa edilmiştir.
 
-## Features
+- **Ön yüz:** Next.js 15 (App Router) · React 19 · TypeScript · **RTK Query** ·
+  **next-intl** (TR/DE/EN) · React Hook Form + Zod · Tailwind CSS
+- **Arka yüz:** Spring Boot 3.3 (Java 21) · PostgreSQL · Hibernate/JPA ·
+  Spring Security (stateless JWT + RBAC) · Flyway · S3/MinIO · Mail
+- **Altyapı:** Docker Compose · GitHub Actions CI/CD
 
-- Animated aurora / gradient-mesh hero background (pure CSS, no dependencies)
-- Live countdown to launch
-- Email waitlist capture with a Next.js API route (persists to a JSON file on a mounted volume)
-- Brand wordmark, tagline, and social footer
-- Responsive, accessible, reduced-motion friendly
-- SEO / OpenGraph / Twitter metadata for `sefaris.site`
+## Hızlı Başlangıç
 
-## Local development
+### Gereksinimler
+- Node.js 20+ · Java 21+ · (opsiyonel) Docker & Docker Compose · PostgreSQL 16
 
+### Kurulum
 ```bash
-npm install
-npm run dev
-# http://localhost:3000
-```
+cp .env.example .env                     # değişkenleri doldur
 
-Run the unit tests (email validation):
+# 1) Backend (H2 ile, DB gerekmez — hızlı deneme)
+cd backend && mvn spring-boot:run        # http://localhost:8080/api/v1
 
-```bash
-npm test
-```
+# 2) Frontend
+cd frontend && npm install && npm run dev # http://localhost:3000/tr
 
-## Production build
-
-```bash
-npm run build
-npm start
-```
-
-## Docker (local)
-
-```bash
+# veya tüm yığın:
 docker compose up --build
-# http://localhost:3000
 ```
 
-The image uses Next.js **standalone** output on `node:22-alpine`, runs as a non-root user, exposes port **3000**, and has a built-in `HEALTHCHECK`.
+Seed girişi: **admin@sefaris.site / Sefaris2026!**
 
-## Deploying on Coolify
-
-1. **New Resource → Application → Public/Private Repository** and point it at `github.com/ubterzioglu/sefaris`.
-2. **Build Pack:** choose **Dockerfile** (not Nixpacks). Coolify will use the `Dockerfile` in the repo root.
-3. **Port:** set the exposed port to **`3000`**.
-4. **Domain:** set the domain to **`https://sefaris.site`**. Coolify provisions TLS via Let's Encrypt automatically. Point the `sefaris.site` DNS A/AAAA record at your Coolify server first.
-5. **Persistent storage:** add a **Volume Mount** with destination **`/data`** so waitlist signups survive redeploys (`subscribers.json` is written there).
-6. **Environment variables (optional):**
-   - `NEXT_PUBLIC_LAUNCH_DATE` — ISO date for the countdown, e.g. `2026-08-01T09:00:00Z`. Defaults to 30 days from build if unset.
-   - `SUBSCRIBERS_PATH` — defaults to `/data/subscribers.json`; leave as-is when using the volume above.
-7. **Deploy.** Coolify builds the Dockerfile and runs the container. The built-in healthcheck hits `/`.
-
-## Project structure
-
+## Yapı (monorepo)
 ```
-app/
-  layout.tsx            # metadata, fonts
-  page.tsx              # composes the page
-  globals.css           # tailwind + animations
-  api/subscribe/route.ts# waitlist endpoint (POST)
-components/
-  AuroraBackground.tsx
-  Countdown.tsx
-  SubscribeForm.tsx
-  Footer.tsx
-lib/
-  validateEmail.ts      # shared pure validator
-  validateEmail.test.ts # unit tests
-Dockerfile              # multi-stage standalone build
-docker-compose.yml      # local prod test
+sefaris/
+  frontend/   # Next.js + RTK Query + next-intl
+  backend/    # Spring Boot + PostgreSQL/JPA
+  docs/       # API.md, DEPLOYMENT.md
+  sefarislast.md         # mimari rehber (v4.0.0)
+  docker-compose.yml     # frontend+backend+postgres+redis+minio
+  .github/workflows/deploy.yml
 ```
 
-## Editing copy
+## Mimari
+- [Frontend](./frontend) · [Backend](./backend)
+- [API Dokümantasyonu](./docs/API.md) · [Deployment Rehberi](./docs/DEPLOYMENT.md)
+- Tam mimari: [`sefarislast.md`](./sefarislast.md)
 
-- **Wordmark / tagline:** `app/page.tsx`
-- **Social links:** `components/Footer.tsx`
-- **Metadata / SEO:** `app/layout.tsx`
+## Komutlar
+| Komut | Açıklama |
+|-------|----------|
+| `cd frontend && npm run dev` | Frontend geliştirme sunucusu |
+| `cd frontend && npm run build` | Frontend production build |
+| `cd backend && mvn spring-boot:run` | Backend (varsayılan H2 profili) |
+| `cd backend && mvn package` | Backend jar + testler |
+| `docker compose up --build` | Tüm servisleri başlat |
+
+## Notlar
+- Bu, `sefarislast.md`'deki 12 haftalık mimarinin uçtan uca **çalışan iskeletidir**;
+  çekirdek akışlar (auth, görev/Kanban, CRM, dashboard, public→lead) gerçek, bazı
+  modüller Faz 2/3'te derinleştirilecek sadeleştirilmiş sürümdür.
+- Google OAuth Faz 2'de etkinleştirilir (bkz. `docs/DEPLOYMENT.md`).
