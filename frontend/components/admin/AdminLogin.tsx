@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useAdminLoginMutation } from "@/store/api/authApi";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
@@ -17,6 +18,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function AdminLogin() {
   const dispatch = useAppDispatch();
+  const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading, isError }] = useAdminLoginMutation();
   const {
     register,
@@ -69,12 +71,24 @@ export function AdminLogin() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <Field label="Yönetici şifresi" error={errors.password?.message}>
-              <Input
-                type="password"
-                autoComplete="current-password"
-                autoFocus
-                {...register("password")}
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  autoFocus
+                  className="pr-11"
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition hover:text-primary"
+                  aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </Field>
             {isError && (
               <p className="text-sm text-danger">Giriş başarısız. Şifreyi kontrol edin.</p>
