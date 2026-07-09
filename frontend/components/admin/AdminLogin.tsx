@@ -5,10 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useAdminLoginMutation } from "@/store/api/authApi";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
 import { Button, Field, Input } from "@/components/ui";
+
+// Admin girişi DB'den bağımsız: şifre build sırasında gömülen bu değerle
+// (NEXT_PUBLIC_ADMIN_PASSWORD) tarayıcıda karşılaştırılır. Backend/DB gerekmez.
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "";
 
 const loginSchema = z.object({
   password: z.string().min(1, "Şifre gerekli"),
@@ -19,20 +22,38 @@ type LoginForm = z.infer<typeof loginSchema>;
 export function AdminLogin() {
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
-  const [login, { isLoading, isError }] = useAdminLoginMutation();
+  const [isError, setIsError] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = async (data: LoginForm) => {
-    try {
-      const result = await login(data).unwrap();
-      dispatch(setCredentials(result));
-    } catch {
-      /* isError ile gösterilir */
+  const onSubmit = (data: LoginForm) => {
+    if (!ADMIN_PASSWORD || data.password !== ADMIN_PASSWORD) {
+      setIsError(true);
+      return;
     }
+    setIsError(false);
+    // Yerel admin oturumu — token backend'e gitmez, sadece paneli açar.
+    dispatch(
+      setCredentials({
+        token: "local-admin",
+        refreshToken: "local-admin",
+        expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+        user: {
+          id: "00000000-0000-0000-0000-000000000000",
+          email: "admin@sefaris.site",
+          fullName: "Sefaris Admin",
+          role: "super_admin",
+          status: "active",
+          avatarUrl: null,
+          hourlyRate: null,
+          expertiseTags: [],
+          preferredLanguage: "tr",
+        },
+      })
+    );
   };
 
   return (
@@ -91,10 +112,10 @@ export function AdminLogin() {
               </div>
             </Field>
             {isError && (
-              <p className="text-sm text-danger">Giriş başarısız. Şifreyi kontrol edin.</p>
+              <p className="text-sm text-danger">Şifre hatalı.</p>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Giriş yapılıyor..." : "Giriş yap"}
+            <Button type="submit" className="w-full">
+              Giriş yap
             </Button>
           </form>
         </div>
