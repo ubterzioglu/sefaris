@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "about": "Über Uns",
+    "services": "Leistungen",
+    "projects": "Projekte",
+    "blog": "Blog",
+    "careers": "Karriere",
+    "contact": "Kontakt",
+    "admin": "Admin-Panel",
+    "startProject": "Projekt starten"
+  },
+  "home": {
+    "heroTitle": "Ihre skalierbare digitale Brücke zwischen der Türkei und Deutschland",
+    "heroSubtitle": "Plattform für Softwareentwicklung, digitale Transformation und IT-Beratung sowie Projektpartnerschaft.",
+    "ctaPrimary": "Projekt starten",
+    "ctaSecondary": "Unseren Tech-Stack ansehen",
+    "stats": {
+      "experience": "Jahre kumulierte Erfahrung",
+      "delivery": "Erfolgreiche Lieferungen",
+      "satisfaction": "Kundenzufriedenheit",
+      "countries": "Länder / 1 Hybrid-Team"
+    },
+    "servicesTitle": "Unsere Leistungen",
+    "whyTitle": "Warum wir?",
+    "whySubtitle": "Deutsche Disziplin und türkische Ingenieursflexibilität zugleich.",
+    "featuredTitle": "Ausgewählte Projekte",
+    "testimonialsTitle": "Kundenstimmen"
+  },
+  "services": {
+    "ozelYazilim": "Individuelle Softwareentwicklung",
+    "projeOrtakligi": "Projektpartnerschaft & Outsourcing Deutschland",
+    "seoGeo": "SEO / GEO & Digitales Wachstum",
+    "danismanlik": "KI- & Cloud-Beratung",
+    "kurumsalKimlik": "Corporate Identity & Design",
+    "egitim": "Bildungstechnologien"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "name": "Name",
+    "email": "E-Mail",
+    "company": "Unternehmen",
+    "projectType": "Projektart",
+    "budget": "Budgetrahmen",
+    "message": "Ihre Nachricht",
+    "submit": "Senden",
+    "success": "Ihre Anfrage ist eingegangen, wir melden uns in Kürze.",
+    "error": "Ein Fehler ist aufgetreten, bitte erneut versuchen."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "tasks": "Aufgaben",
+    "projects": "Projekte",
+    "customers": "Kunden",
+    "finance": "Finanzen",
+    "seo": "SEO",
+    "documents": "Dokumente",
+    "team": "Team",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "welcome": "Willkommen"
+  },
+  "common": {
+    "loading": "Wird geladen...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "search": "Suchen",
+    "all": "Alle"
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten.",
+    "offices": "Büros: Istanbul · Izmir · Berlin · München"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "projects": "Projects",
+    "blog": "Blog",
+    "careers": "Careers",
+    "contact": "Contact",
+    "admin": "Admin Panel",
+    "startProject": "Start Your Project"
+  },
+  "home": {
+    "heroTitle": "Your scalable digital bridge between Turkey and Germany",
+    "heroSubtitle": "Engineering and project partnership platform for software development, digital transformation and IT consulting.",
+    "ctaPrimary": "Start Your Project",
+    "ctaSecondary": "Explore Our Tech Stack",
+    "stats": {
+      "experience": "Years Cumulative Experience",
+      "delivery": "Successful Deliveries",
+      "satisfaction": "Client Satisfaction",
+      "countries": "Countries / 1 Hybrid Team"
+    },
+    "servicesTitle": "Our Services",
+    "whyTitle": "Why Us?",
+    "whySubtitle": "German discipline and Turkish engineering flexibility at once.",
+    "featuredTitle": "Featured Projects",
+    "testimonialsTitle": "Testimonials"
+  },
+  "services": {
+    "ozelYazilim": "Custom Software Development",
+    "projeOrtakligi": "Germany Project Partnership & Outsourcing",
+    "seoGeo": "SEO / GEO & Digital Growth",
+    "danismanlik": "AI & Cloud Consulting",
+    "kurumsalKimlik": "Corporate Identity & Design",
+    "egitim": "Education Technologies"
+  },
+  "contact": {
+    "title": "Contact",
+    "name": "Full Name",
+    "email": "Email",
+    "company": "Company",
+    "projectType": "Project Type",
+    "budget": "Budget Range",
+    "message": "Your Message",
+    "submit": "Send",
+    "success": "Your request has been received, we will get back to you soon.",
+    "error": "An error occurred, please try again."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "projects": "Projects",
+    "customers": "Customers",
+    "finance": "Finance",
+    "seo": "SEO",
+    "documents": "Documents",
+    "team": "Team",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Sign In",
+    "welcome": "Welcome"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "all": "All"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "offices": "Offices: Istanbul · Izmir · Berlin · Munich"
+  }
+}

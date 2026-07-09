@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "home": "Ana Sayfa",
+    "about": "Hakkımızda",
+    "services": "Hizmetler",
+    "projects": "Projeler",
+    "blog": "Blog",
+    "careers": "Kariyer",
+    "contact": "İletişim",
+    "admin": "Yönetim Paneli",
+    "startProject": "Projenizi Başlatın"
+  },
+  "home": {
+    "heroTitle": "Türkiye ve Almanya Arasında Yüksek Ölçeklenebilir Dijital Çözüm Köprünüz",
+    "heroSubtitle": "Yazılım geliştirme, dijital dönüşüm ve IT danışmanlığı sunan mühendislik ve proje ortaklığı platformu.",
+    "ctaPrimary": "Projenizi Başlatın",
+    "ctaSecondary": "Teknoloji Stack'imizi İnceleyin",
+    "stats": {
+      "experience": "Yıl Kümülatif Tecrübe",
+      "delivery": "Başarılı Teslimat",
+      "satisfaction": "Müşteri Memnuniyeti",
+      "countries": "Ülke / 1 Hibrit Ekip"
+    },
+    "servicesTitle": "Hizmetlerimiz",
+    "whyTitle": "Neden Biz?",
+    "whySubtitle": "Alman disiplini ile Türk mühendislik esnekliğini aynı anda.",
+    "featuredTitle": "Öne Çıkan Projeler",
+    "testimonialsTitle": "Müşteri Yorumları"
+  },
+  "services": {
+    "ozelYazilim": "Özel Yazılım Geliştirme",
+    "projeOrtakligi": "Almanya Proje Ortaklığı & Outsourcing",
+    "seoGeo": "SEO / GEO & Dijital Büyüme",
+    "danismanlik": "AI & Bulut Danışmanlığı",
+    "kurumsalKimlik": "Kurumsal Kimlik & Tasarım",
+    "egitim": "Eğitim Teknolojileri"
+  },
+  "contact": {
+    "title": "İletişim",
+    "name": "Ad Soyad",
+    "email": "E-posta",
+    "company": "Şirket",
+    "projectType": "Proje Türü",
+    "budget": "Bütçe Aralığı",
+    "message": "Mesajınız",
+    "submit": "Gönder",
+    "success": "Talebiniz alındı, en kısa sürede dönüş yapacağız.",
+    "error": "Bir hata oluştu, lütfen tekrar deneyin."
+  },
+  "admin": {
+    "dashboard": "Panel",
+    "tasks": "Görevler",
+    "projects": "Projeler",
+    "customers": "Müşteriler",
+    "finance": "Finans",
+    "seo": "SEO",
+    "documents": "Dokümanlar",
+    "team": "Ekip",
+    "settings": "Ayarlar",
+    "logout": "Çıkış",
+    "login": "Giriş Yap",
+    "welcome": "Hoş geldiniz"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "search": "Ara",
+    "all": "Tümü"
+  },
+  "footer": {
+    "rights": "Tüm hakları saklıdır.",
+    "offices": "Ofisler: İstanbul · İzmir · Berlin · Münih"
+  }
+}
