@@ -8,6 +8,7 @@ import {
   FileText,
   UserCog,
   Settings,
+  ListChecks,
   type LucideIcon,
 } from "lucide-react";
 
@@ -29,5 +30,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/admin/seo", label: "SEO", icon: Search },
   { href: "/admin/dokumanlar", label: "Dokümanlar", icon: FileText },
   { href: "/admin/ekip", label: "Ekip", icon: UserCog },
+  { href: "/admin/kalanlar", label: "Kalanlar", icon: ListChecks },
   { href: "/admin/ayarlar", label: "Ayarlar", icon: Settings },
 ];
