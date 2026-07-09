@@ -23,6 +23,11 @@ public final class AuthDtos {
             @NotBlank String password
     ) {}
 
+    /** Admin panel — tek şifreyle giriş (e-posta yok). */
+    public record AdminLoginRequest(
+            @NotBlank String password
+    ) {}
+
     public record GoogleLoginRequest(
             @NotBlank String idToken
     ) {}

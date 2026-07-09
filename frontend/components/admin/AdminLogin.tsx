@@ -4,21 +4,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ShieldCheck } from "lucide-react";
-import { useLoginMutation } from "@/store/api/authApi";
+import { useAdminLoginMutation } from "@/store/api/authApi";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
 import { Button, Field, Input } from "@/components/ui";
 
 const loginSchema = z.object({
-  email: z.string().email("Geçerli bir e-posta girin"),
-  password: z.string().min(6, "Şifre en az 6 karakter olmalı"),
+  password: z.string().min(1, "Şifre gerekli"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
 
 export function AdminLogin() {
   const dispatch = useAppDispatch();
-  const [login, { isLoading, isError }] = useLoginMutation();
+  const [login, { isLoading, isError }] = useAdminLoginMutation();
   const {
     register,
     handleSubmit,
@@ -66,17 +65,19 @@ export function AdminLogin() {
             <span className="text-lg font-semibold text-primary">Sefaris Yönetim</span>
           </div>
           <h1 className="text-xl font-semibold text-primary">Panele giriş</h1>
-          <p className="mt-1 text-sm text-slate-500">Devam etmek için giriş yapın.</p>
+          <p className="mt-1 text-sm text-slate-500">Devam etmek için yönetici şifresini girin.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-            <Field label="E-posta" error={errors.email?.message}>
-              <Input type="email" autoComplete="email" {...register("email")} />
-            </Field>
-            <Field label="Şifre" error={errors.password?.message}>
-              <Input type="password" autoComplete="current-password" {...register("password")} />
+            <Field label="Yönetici şifresi" error={errors.password?.message}>
+              <Input
+                type="password"
+                autoComplete="current-password"
+                autoFocus
+                {...register("password")}
+              />
             </Field>
             {isError && (
-              <p className="text-sm text-danger">Giriş başarısız. Bilgilerinizi kontrol edin.</p>
+              <p className="text-sm text-danger">Giriş başarısız. Şifreyi kontrol edin.</p>
             )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Giriş yapılıyor..." : "Giriş yap"}

@@ -33,6 +33,12 @@ public class AuthController {
         return authService.login(req);
     }
 
+    /** Admin panel — tek şifreyle giriş (e-posta yok). */
+    @PostMapping("/admin-login")
+    public AuthResponse adminLogin(@Valid @RequestBody AdminLoginRequest req) {
+        return authService.adminLogin(req);
+    }
+
     @PostMapping("/google")
     public AuthResponse google(@Valid @RequestBody GoogleLoginRequest req) {
         return authService.google(req);

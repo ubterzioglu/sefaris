@@ -6,6 +6,10 @@ export const authApi = baseApi.injectEndpoints({
     login: builder.mutation<AuthResponse, { email: string; password: string }>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),
     }),
+    // Admin panel — tek şifreyle giriş (e-posta yok).
+    adminLogin: builder.mutation<AuthResponse, { password: string }>({
+      query: (body) => ({ url: "/auth/admin-login", method: "POST", body }),
+    }),
     register: builder.mutation<AuthResponse, { email: string; password: string; fullName: string }>({
       query: (body) => ({ url: "/auth/register", method: "POST", body }),
     }),
@@ -16,4 +20,5 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useMeQuery } = authApi;
+export const { useLoginMutation, useAdminLoginMutation, useRegisterMutation, useMeQuery } =
+  authApi;
