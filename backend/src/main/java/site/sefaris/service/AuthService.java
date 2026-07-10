@@ -1,6 +1,5 @@
 package site.sefaris.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +24,6 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JwtService jwt;
     private final EmailService email;
-
-    /** Admin panel tek-şifre girişi (application.yml sefaris.admin.*). */
-    @Value("${sefaris.admin.email}")
-    private String adminEmail;
-    @Value("${sefaris.admin.password}")
-    private String adminPassword;
 
     public AuthService(UserRepository users, PasswordEncoder encoder, JwtService jwt, EmailService email) {
         this.users = users;
@@ -61,26 +54,6 @@ public class AuthService {
         if (u.getPasswordHash() == null || !encoder.matches(req.password(), u.getPasswordHash())) {
             throw new ApiException(ErrorCode.INVALID_CREDENTIALS);
         }
-        u.setLastLoginAt(Instant.now());
-        return tokens(u);
-    }
-
-    /**
-     * Admin panel — tek şifreyle giriş. E-posta istemez; yapılandırılmış admin
-     * şifresi eşleşirse admin kullanıcısına token verilir (bölüm 4.1).
-     */
-    @Transactional
-    public AuthResponse adminLogin(AdminLoginRequest req) {
-        // Sabit-zamanlı karşılaştırma (timing attack önleme).
-        boolean ok = adminPassword != null
-                && java.security.MessageDigest.isEqual(
-                        adminPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-                        req.password().getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        if (!ok) {
-            throw new ApiException(ErrorCode.INVALID_CREDENTIALS);
-        }
-        User u = users.findByEmail(adminEmail)
-                .orElseThrow(() -> new ApiException(ErrorCode.INVALID_CREDENTIALS));
         u.setLastLoginAt(Instant.now());
         return tokens(u);
     }
