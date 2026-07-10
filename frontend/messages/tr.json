@@ -10,6 +10,13 @@
     "admin": "Yönetim Paneli",
     "startProject": "Projenizi Başlatın"
   },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "description": "Aradığınız sayfa taşınmış, adı değişmiş ya da hiç var olmamış olabilir. Aşağıdaki bağlantılardan devam edebilirsiniz.",
+    "backHome": "Ana sayfaya dön",
+    "contact": "İletişime geç",
+    "quickLinks": "Popüler sayfalar"
+  },
   "home": {
     "heroTitle": "Türkiye ve Almanya Arasında Yüksek Ölçeklenebilir Dijital Çözüm Köprünüz",
     "heroSubtitle": "Yazılım geliştirme, dijital dönüşüm ve IT danışmanlığı sunan mühendislik ve proje ortaklığı platformu.",

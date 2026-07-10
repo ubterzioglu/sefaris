@@ -10,6 +10,13 @@
     "admin": "Admin-Panel",
     "startProject": "Projekt starten"
   },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite wurde möglicherweise verschoben, umbenannt oder existiert nicht. Über die folgenden Links geht es weiter.",
+    "backHome": "Zur Startseite",
+    "contact": "Kontakt aufnehmen",
+    "quickLinks": "Beliebte Seiten"
+  },
   "home": {
     "heroTitle": "Ihre skalierbare digitale Brücke zwischen der Türkei und Deutschland",
     "heroSubtitle": "Plattform für Softwareentwicklung, digitale Transformation und IT-Beratung sowie Projektpartnerschaft.",

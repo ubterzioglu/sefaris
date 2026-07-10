@@ -10,6 +10,13 @@
     "admin": "Admin Panel",
     "startProject": "Start Your Project"
   },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for may have been moved, renamed, or never existed. Continue from one of the links below.",
+    "backHome": "Back to home",
+    "contact": "Get in touch",
+    "quickLinks": "Popular pages"
+  },
   "home": {
     "heroTitle": "Your scalable digital bridge between Turkey and Germany",
     "heroSubtitle": "Engineering and project partnership platform for software development, digital transformation and IT consulting.",
