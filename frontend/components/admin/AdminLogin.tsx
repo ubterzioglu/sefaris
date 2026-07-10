@@ -7,11 +7,13 @@ import { z } from "zod";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
+import { useLoginMutation } from "@/store/api/authApi";
 import { Button, Field, Input } from "@/components/ui";
 
-// Admin girişi DB'den bağımsız: şifre build sırasında gömülen bu değerle
-// (NEXT_PUBLIC_ADMIN_PASSWORD) tarayıcıda karşılaştırılır. Backend/DB gerekmez.
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "";
+// Admin girişi tek şifreyle: e-posta sabittir (yönetici hesabı), şifre backend
+// /auth/login ile doğrulanır ve GERÇEK JWT alınır. Böylece panel korumalı
+// endpoint'lerden (görevler, projeler vb.) gerçek veriyi okuyabilir.
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "admin@sefaris.site";
 
 const loginSchema = z.object({
   password: z.string().min(1, "Şifre gerekli"),
@@ -21,6 +23,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function AdminLogin() {
   const dispatch = useAppDispatch();
+  const [login, { isLoading }] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [isError, setIsError] = useState(false);
   const {
@@ -29,31 +32,14 @@ export function AdminLogin() {
     formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = (data: LoginForm) => {
-    if (!ADMIN_PASSWORD || data.password !== ADMIN_PASSWORD) {
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      const res = await login({ email: ADMIN_EMAIL, password: data.password }).unwrap();
+      setIsError(false);
+      dispatch(setCredentials(res));
+    } catch {
       setIsError(true);
-      return;
     }
-    setIsError(false);
-    // Yerel admin oturumu — token backend'e gitmez, sadece paneli açar.
-    dispatch(
-      setCredentials({
-        token: "local-admin",
-        refreshToken: "local-admin",
-        expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
-        user: {
-          id: "00000000-0000-0000-0000-000000000000",
-          email: "admin@sefaris.site",
-          fullName: "Sefaris Admin",
-          role: "super_admin",
-          status: "active",
-          avatarUrl: null,
-          hourlyRate: null,
-          expertiseTags: [],
-          preferredLanguage: "tr",
-        },
-      })
-    );
   };
 
   return (
@@ -114,8 +100,8 @@ export function AdminLogin() {
             {isError && (
               <p className="text-sm text-danger">Şifre hatalı.</p>
             )}
-            <Button type="submit" className="w-full">
-              Giriş yap
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Giriş yapılıyor..." : "Giriş yap"}
             </Button>
           </form>
         </div>
