@@ -44,8 +44,10 @@ yarn-error.log*
 .env.*
 !.env.example
 
-# omc state
+# omc state (kök + alt dizinler)
 /.omc
+.omc/
+**/.omc/
 
 # çalışma zamanı logları
 *.log
