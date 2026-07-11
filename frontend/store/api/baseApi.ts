@@ -18,5 +18,11 @@ export const baseApi = createApi({
     "Task", "Project", "Customer", "Lead", "Finance",
     "User", "Document", "SEO", "Dashboard", "Announcement",
   ],
+  // Panelde taze veri: cache'i çok uzun tutma ve mount/odak/yeniden bağlanınca
+  // yeniden çek. Böylece sayfalar arası gezerken eski veri görünmez.
+  keepUnusedDataFor: 30,
+  refetchOnMountOrArgChange: true,
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
   endpoints: () => ({}),
 });
