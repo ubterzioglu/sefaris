@@ -22,8 +22,11 @@ RUN --mount=type=cache,target=/root/.npm \
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Backend API adresi build sırasında gömülür (NEXT_PUBLIC_*).
-ARG NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+# Backend API adresi build sırasında gömülür (NEXT_PUBLIC_*). Varsayılan
+# PROD adresi: Coolify build-arg geçmezse bile tarayıcı canlı API'ye gider
+# (localhost:8080 tarayıcıda çözülemez → ERR_NAME_NOT_RESOLVED olurdu).
+# Yerel geliştirmede `npm run dev` .env'den localhost'u kullanır.
+ARG NEXT_PUBLIC_API_URL=https://api.sefaris.site/api/v1
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production

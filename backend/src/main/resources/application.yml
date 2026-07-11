@@ -37,7 +37,9 @@ sefaris:
     expiration-seconds: ${JWT_EXPIRATION:86400}
     refresh-expiration-seconds: ${JWT_REFRESH_EXPIRATION:604800}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+    # Varsayılan prod + yerel origin'leri kapsar; Coolify'da CORS_ALLOWED_ORIGINS
+    # ile override edilebilir. sefaris.site frontend'i api.sefaris.site'e istek atar.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://sefaris.site,https://www.sefaris.site,http://localhost:3000}
   storage:
     endpoint: ${S3_ENDPOINT:http://localhost:9000}
     bucket: ${S3_BUCKET:sefaris-documents}
