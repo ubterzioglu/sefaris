@@ -6,7 +6,7 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Providers } from "@/app/providers";
-import "../globals.css";
+import "../globals.css";  
 
 const SITE_URL = "https://sefaris.site";
 

@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, type DragEvent } from "react";
+import { useState, useEffect, type DragEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, LayoutList, Columns3 } from "lucide-react";
+import { Plus, LayoutList, Columns3, Pencil } from "lucide-react";
 import {
   useGetTasksQuery,
   useCreateTaskMutation,
+  useUpdateTaskMutation,
   useUpdateTaskStatusMutation,
   type GetTasksParams,
 } from "@/store/api/taskApi";
@@ -36,6 +37,7 @@ const KANBAN_COLUMNS: TaskStatus[] = ["open", "in_progress", "in_review", "compl
 const taskSchema = z.object({
   title: z.string().min(2, "En az 2 karakter").max(300, "En fazla 300 karakter"),
   priority: z.enum(["low", "medium", "high", "urgent"]),
+  status: z.enum(["open", "in_progress", "in_review", "completed", "cancelled", "delayed"]),
   dueDate: z.string().optional(),
   description: z.string().max(5000).optional(),
 });
@@ -46,6 +48,7 @@ export default function TasksPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [priorityFilter, setPriorityFilter] = useState<string>("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const params: GetTasksParams = {};
   if (statusFilter) params.status = statusFilter;
@@ -54,18 +57,38 @@ export default function TasksPage() {
   const { data: tasks, isLoading } = useGetTasksQuery(params);
   const [updateStatus] = useUpdateTaskStatusMutation();
 
-  const onQuickStatus = async (id: string, status: TaskStatus) => {
-    try {
-      await updateStatus({ id, status }).unwrap();
-    } catch {
-      /* optimistic geri alınır */
-    }
-  };
+ const onQuickStatus = async (id: string, status: TaskStatus) => {
+  try {
+    await updateStatus({ id, status }).unwrap();
+  } catch (err: any) {
+    console.error("Durum güncellenemedi:", {
+      status: err?.status,
+      data: err?.data,
+      error: err?.error,
+      message: err?.message,
+    });
+  }
+};
 
   const onDrop = async (e: DragEvent<HTMLDivElement>, status: TaskStatus) => {
     e.preventDefault();
     const id = e.dataTransfer.getData("text/plain");
     if (id) await onQuickStatus(id, status);
+  };
+
+  const openCreate = () => {
+    setEditingTask(null);
+    setModalOpen(true);
+  };
+
+  const openEdit = (task: Task) => {
+    setEditingTask(task);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingTask(null);
   };
 
   return (
@@ -97,7 +120,7 @@ export default function TasksPage() {
                 <Columns3 className="h-4 w-4" /> Kanban
               </button>
             </div>
-            <Button onClick={() => setModalOpen(true)} className="px-4 py-2.5">
+            <Button onClick={openCreate} className="px-4 py-2.5">
               <Plus className="h-4 w-4" /> Yeni Görev
             </Button>
           </div>
@@ -144,6 +167,7 @@ export default function TasksPage() {
                     <th className="px-4 py-3 font-medium">Öncelik</th>
                     <th className="px-4 py-3 font-medium">Son Tarih</th>
                     <th className="px-4 py-3 font-medium">Durum</th>
+                    <th className="px-4 py-3 font-medium text-right">İşlem</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -171,6 +195,16 @@ export default function TasksPage() {
                             </option>
                           ))}
                         </select>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => openEdit(t)}
+                          className="inline-flex items-center gap-1 rounded-md p-1.5 text-slate-400 hover:bg-surface hover:text-primary"
+                          aria-label="Düzenle"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -200,7 +234,7 @@ export default function TasksPage() {
                 </div>
                 <div className="space-y-2">
                   {colTasks.map((t) => (
-                    <KanbanCard key={t.id} task={t} />
+                    <KanbanCard key={t.id} task={t} onEdit={() => openEdit(t)} />
                   ))}
                   {colTasks.length === 0 && (
                     <p className="rounded-lg border border-dashed border-line py-6 text-center text-xs text-slate-400">
@@ -214,12 +248,12 @@ export default function TasksPage() {
         </div>
       )}
 
-      <CreateTaskModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <TaskFormModal open={modalOpen} onClose={closeModal} task={editingTask} />
     </div>
   );
 }
 
-function KanbanCard({ task }: { task: Task }) {
+function KanbanCard({ task, onEdit }: { task: Task; onEdit: () => void }) {
   const onDragStart = (e: DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("text/plain", task.id);
     e.dataTransfer.effectAllowed = "move";
@@ -228,7 +262,8 @@ function KanbanCard({ task }: { task: Task }) {
     <div
       draggable
       onDragStart={onDragStart}
-      className="cursor-grab rounded-lg border border-line bg-white p-3 shadow-sm active:cursor-grabbing"
+      onClick={onEdit}
+      className="cursor-grab rounded-lg border border-line bg-white p-3 shadow-sm hover:border-accent/40 active:cursor-grabbing"
     >
       <p className="text-sm font-medium text-primary">{task.title}</p>
       <div className="mt-2 flex items-center justify-between">
@@ -241,8 +276,20 @@ function KanbanCard({ task }: { task: Task }) {
   );
 }
 
-function CreateTaskModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [createTask, { isLoading }] = useCreateTaskMutation();
+function TaskFormModal({
+  open,
+  onClose,
+  task,
+}: {
+  open: boolean;
+  onClose: () => void;
+  task: Task | null;
+}) {
+  const isEdit = !!task;
+  const [createTask, { isLoading: creating }] = useCreateTaskMutation();
+  const [updateTask, { isLoading: updating }] = useUpdateTaskMutation();
+  const isLoading = creating || updating;
+
   const {
     register,
     handleSubmit,
@@ -250,26 +297,54 @@ function CreateTaskModal({ open, onClose }: { open: boolean; onClose: () => void
     formState: { errors },
   } = useForm<TaskForm>({
     resolver: zodResolver(taskSchema),
-    defaultValues: { priority: "medium" },
+    defaultValues: { priority: "medium", status: "open" },
   });
+
+  // Modal her açıldığında (yeni task veya farklı task) formu doğru verilerle doldur
+  useEffect(() => {
+    if (!open) return;
+    if (task) {
+      reset({
+        title: task.title,
+        priority: task.priority,
+        status: task.status,
+        dueDate: task.dueDate ? task.dueDate.slice(0, 10) : "",
+        description: task.description ?? "",
+      });
+    } else {
+      reset({ title: "", priority: "medium", status: "open", dueDate: "", description: "" });
+    }
+  }, [open, task, reset]);
 
   const onSubmit = async (data: TaskForm) => {
     try {
-      await createTask({
-        title: data.title,
-        priority: data.priority,
-        dueDate: data.dueDate || null,
-        description: data.description || null,
-      }).unwrap();
-      reset({ priority: "medium", title: "", dueDate: "", description: "" });
+      if (isEdit && task) {
+        await updateTask({
+          id: task.id,
+          body: {
+            title: data.title,
+            priority: data.priority,
+            status: data.status,
+            dueDate: data.dueDate || null,
+            description: data.description || null,
+          },
+        }).unwrap();
+      } else {
+        await createTask({
+          title: data.title,
+          priority: data.priority,
+          dueDate: data.dueDate || null,
+          description: data.description || null,
+        }).unwrap();
+      }
       onClose();
-    } catch {
-      /* hata */
+    } catch (err) {
+      console.error("Görev kaydedilemedi:", err);
     }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Yeni Görev">
+    <Modal open={open} onClose={onClose} title={isEdit ? "Görevi Düzenle" : "Yeni Görev"}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Field label="Başlık" error={errors.title?.message}>
           <Input {...register("title")} placeholder="Görev başlığı" />
@@ -284,6 +359,17 @@ function CreateTaskModal({ open, onClose }: { open: boolean; onClose: () => void
               ))}
             </Select>
           </Field>
+          {isEdit && (
+            <Field label="Durum" error={errors.status?.message}>
+              <Select {...register("status")}>
+                {ALL_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {TASK_STATUS_LABELS_TR[s]}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          )}
           <Field label="Son Tarih" error={errors.dueDate?.message}>
             <Input type="date" {...register("dueDate")} />
           </Field>
@@ -296,7 +382,7 @@ function CreateTaskModal({ open, onClose }: { open: boolean; onClose: () => void
             İptal
           </Button>
           <Button type="submit" disabled={isLoading} className="px-4 py-2.5">
-            {isLoading ? "Kaydediliyor..." : "Oluştur"}
+            {isLoading ? "Kaydediliyor..." : isEdit ? "Güncelle" : "Oluştur"}
           </Button>
         </div>
       </form>
