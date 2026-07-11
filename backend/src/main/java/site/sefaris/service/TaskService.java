@@ -20,6 +20,7 @@ import site.sefaris.security.SecurityUtils;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /** Görev iş mantığı (rehber bölüm 4.2 + 15.1 durum geçişleri). */
@@ -103,8 +104,9 @@ public class TaskService {
         Task t = find(id);
         applyStatus(t, parseStatus(status));
         t.setUpdatedAt(Instant.now());
+        tasks.saveAndFlush(t);
         activity.log("task_status_changed", "task", t.getId(),
-                "{\"new_status\":\"" + t.getStatus().name().toLowerCase() + "\"}");
+                "{\"new_status\":\"" + t.getStatus().name().toLowerCase(Locale.ROOT) + "\"}");
         return TaskResponse.from(t);
     }
 
@@ -161,18 +163,31 @@ public class TaskService {
         t.setCompletedAt(next == TaskStatus.COMPLETED ? Instant.now() : null);
     }
 
+    /**
+     * String -> TaskStatus dönüşümü.
+     * ÖNEMLİ: toUpperCase() Locale.ROOT ile çağrılıyor. Aksi halde JVM Türkçe locale
+     * ile çalışırken "i" harfi noktalı büyük "İ"ye dönüşür (örn. "in_review" ->
+     * "İN_REVİEW"), bu da TaskStatus.valueOf() ile eşleşmeyip IllegalArgumentException
+     * fırlatır. Bu yüzden "in_progress" ve "in_review" gibi içinde 'i' geçen değerler
+     * başarısız oluyordu; 'i' harfi içermeyen "open", "completed" vb. etkilenmiyordu.
+     */
     private TaskStatus parseStatus(String s) {
         try {
-            return TaskStatus.valueOf(s.toUpperCase());
+            return TaskStatus.valueOf(s.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             throw new ApiException(ErrorCode.INVALID_STATUS_TRANSITION, "status");
         }
     }
 
+    /**
+     * String -> TaskPriority dönüşümü.
+     * Aynı Türkçe locale sorunu "high" değerinde de yaşanır ("high" -> "HİGH" olur ve
+     * TaskPriority.HIGH ile eşleşmez), bu yüzden burada da Locale.ROOT kullanılıyor.
+     */
     private TaskPriority parsePriority(String s, TaskPriority fallback) {
         if (s == null) return fallback;
         try {
-            return TaskPriority.valueOf(s.toUpperCase());
+            return TaskPriority.valueOf(s.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return fallback;
         }

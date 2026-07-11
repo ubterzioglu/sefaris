@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /** Görev modülü DTO'ları (rehber bölüm 4.2 + 11.1). */
@@ -69,9 +70,20 @@ public final class TaskDtos {
             UUID createdBy, List<String> tags, BigDecimal estimatedHours, BigDecimal actualHours,
             Instant createdAt, Instant updatedAt
     ) {
+        /**
+         * ÖNEMLİ: toLowerCase() Locale.ROOT ile çağrılıyor.
+         * JVM Türkçe locale ile çalışırken "I" harfi (enum sabitlerindeki büyük I),
+         * toLowerCase() ile normal "i" yerine noktasız "ı"ya dönüşür. Örn.
+         * "IN_REVIEW".toLowerCase() -> "ın_revıew", "MEDIUM".toLowerCase() -> "medıum".
+         * Bu string'ler frontend'deki TaskStatus/TaskPriority union tipleriyle
+         * eşleşmediği için (örn. "in_review" beklenirken "ın_revıew" geliyor),
+         * durum/öncelik etiketleri ve stilleri frontend'de bulunamıyor, boş/varsayılan
+         * görünüyordu. Locale.ROOT bu dönüşümü dilden bağımsız, kanonik şekilde yapar.
+         */
         public static TaskResponse from(Task t) {
             return new TaskResponse(t.getId(), t.getTitle(), t.getDescription(),
-                    t.getStatus().name().toLowerCase(), t.getPriority().name().toLowerCase(),
+                    t.getStatus().name().toLowerCase(Locale.ROOT),
+                    t.getPriority().name().toLowerCase(Locale.ROOT),
                     t.getAssigneeId(), t.getProjectId(), t.getDueDate(), t.getCompletedAt(),
                     t.getCreatedBy(), JsonUtil.toList(t.getTags()), t.getEstimatedHours(),
                     t.getActualHours(), t.getCreatedAt(), t.getUpdatedAt());
