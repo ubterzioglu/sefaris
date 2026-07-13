@@ -31,13 +31,7 @@ EXPOSE 8080
 # Container'a resource limit konursa JVM heap'i buna göre otomatik ayarlar.
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
 
-# start-period=60s: Flyway migration + uzak DB bağlantısı (Hikari retry'leri)
-# ilk açılışta 30sn'yi aşabiliyordu, bu erken "unhealthy" + rollback'e sebep oluyordu.
-# liveness: sadece JVM/process ayakta mı kontrolü — DB'den bağımsız, bu yüzden
-# DB henüz bağlanmamışken container haksız yere öldürülmez.
-# NOT: context-path /api/v1 olduğu için healthcheck URL'si de buna göre ayarlandı
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:8080/api/v1/actuator/health/liveness || exit 1
+
 
 ENTRYPOINT ["tini", "--"]
 CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
