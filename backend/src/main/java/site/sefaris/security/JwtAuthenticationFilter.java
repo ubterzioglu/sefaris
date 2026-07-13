@@ -42,11 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Public path'lerde JWT kontrolü atla
-        // Context-path /api/v1 olduğu için path /api/v1/auth/... şeklinde gelir
-        if (path.startsWith("/api/v1/auth/") ||
-                path.startsWith("/api/v1/public/") ||
-                path.startsWith("/api/v1/v3/api-docs") ||
+        // Public path'lerde JWT kontrolü atla — sadece gerçekten public olanlar.
+        // /auth/** skip edilmemeli: /auth/login public'tir (token yoksa zaten no-op),
+        // /auth/me gibi authenticated endpoint'ler JWT parse edilmelidir.
+        // Public kontrolü SecurityConfig.requestMatchers(...).permitAll() tarafından yapılıyor;
+        // burada sadece gereksiz parse yükünden kaçınıyoruz.
+        if (path.startsWith("/api/v1/v3/api-docs") ||
                 path.startsWith("/api/v1/swagger-ui") ||
                 path.startsWith("/api/v1/actuator/health")) {
             filterChain.doFilter(request, response);
