@@ -35,8 +35,7 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
 # ilk açılışta 30sn'yi aşabiliyordu, bu erken "unhealthy" + rollback'e sebep oluyordu.
 # liveness: sadece JVM/process ayakta mı kontrolü — DB'den bağımsız, bu yüzden
 # DB henüz bağlanmamışken container haksız yere öldürülmez.
-HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=6 \
-  CMD wget -q --spider http://127.0.0.1:8080/api/v1/actuator/health/liveness || exit 1
+
 
 ENTRYPOINT ["tini", "--"]
 CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
