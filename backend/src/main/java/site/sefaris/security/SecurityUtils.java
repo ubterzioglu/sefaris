@@ -19,7 +19,12 @@ public final class SecurityUtils {
 
     public static Optional<User> currentUser(UserRepository users) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return Optional.empty();
+        if (auth == null) {
+            log.info("currentUser: auth=null");
+            return Optional.empty();
+        }
+        log.info("currentUser: principalType={}, name={}, authenticated={}, authorities={}",
+                auth.getPrincipal().getClass().getName(), auth.getName(), auth.isAuthenticated(), auth.getAuthorities());
         if (auth.getPrincipal() instanceof CustomUserDetails cud) {
             return Optional.of(cud.getUser());
         }
@@ -27,6 +32,7 @@ public final class SecurityUtils {
         // auth.getName() (kullanıcı adı/e-posta) üzerinden DB'den yükle.
         String name = auth.getName();
         if (name != null && !name.isBlank() && !"anonymousUser".equals(name) && users != null) {
+            log.info("currentUser: fallback loading by email={}", name);
             return users.findByEmail(name);
         }
         return Optional.empty();
