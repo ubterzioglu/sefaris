@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.sefaris.dto.UserResponse;
 import site.sefaris.dto.auth.AuthDtos.*;
+import site.sefaris.repository.UserRepository;
 import site.sefaris.security.SecurityUtils;
 import site.sefaris.service.AuthService;
 
@@ -17,9 +18,11 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository users;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserRepository users) {
         this.authService = authService;
+        this.users = users;
     }
 
     @PostMapping("/register")
@@ -45,7 +48,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public UserResponse me() {
-        return authService.me(SecurityUtils.requireUser());
+        return authService.me(SecurityUtils.requireUser(users));
     }
 
     @PostMapping("/logout")

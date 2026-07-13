@@ -12,7 +12,7 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 10MB      # rehber bölüm 10 — 10 MB dosya limiti
+      max-file-size: 10MB
       max-request-size: 12MB
 
   mail:
@@ -24,13 +24,6 @@ spring:
       mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
       mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
 
-# Google OAuth2 (rehber bölüm 2) — Faz 2'de client-id/secret verilince
-# spring.security.oauth2.client.registration.google.* eklenecek. Boş bırakılırsa
-# OAuth2ClientProperties doğrulaması patladığı için registration burada tanımlanmaz.
-
-# === Actuator — Docker/Coolify healthcheck için ===
-# liveness: sadece JVM/process ayakta mı (DB'den bağımsız) — Dockerfile HEALTHCHECK bunu kullanır
-# readiness: DB dahil her şey hazır mı — Coolify'ın proxy'ye trafik yönlendirme kararı için kullanılabilir
 management:
   endpoints:
     web:
@@ -46,8 +39,13 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+    # SMTP/S3 devre dışıyken health DOWN dönmemesi için indicator'ları kapat.
+    # Coolify/uptime monitor'lar 503'ü "sağlıksız" olarak okuyabilir.
+    mail:
+      enabled: false
+    diskspace:
+      enabled: false
 
-# === Uygulama seviyesi ayarlar ===
 sefaris:
   jwt:
     secret: ${JWT_SECRET:change-me-in-prod-this-is-a-256-bit-development-secret-key-0123456789}
@@ -62,11 +60,11 @@ sefaris:
     secret-key: ${S3_SECRET_KEY:minioadmin}
     region: ${S3_REGION:eu-central-1}
     public-url: ${S3_PUBLIC_URL:http://localhost:9000/sefaris-documents}
-    enabled: ${S3_ENABLED:false}   # false → dosya metadata kaydı yapılır, S3'e yazılmaz (yerel derleme/test)
+    enabled: ${S3_ENABLED:false}
   mail:
     from: ${EMAIL_FROM:noreply@sefaris.site}
     from-name: ${EMAIL_FROM_NAME:Sefaris}
-    enabled: ${EMAIL_ENABLED:false}  # false → e-posta gövdeleri loglanır, gönderilmez
+    enabled: ${EMAIL_ENABLED:false}
 
 springdoc:
   swagger-ui:
