@@ -13,18 +13,11 @@ import java.util.UUID;
 /** Giriş yapan kullanıcıya kısayol erişim. */
 public final class SecurityUtils {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecurityUtils.class);
-
     private SecurityUtils() {}
 
     public static Optional<User> currentUser(UserRepository users) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            log.info("currentUser: auth=null");
-            return Optional.empty();
-        }
-        log.info("currentUser: principalType={}, name={}, authenticated={}, authorities={}",
-                auth.getPrincipal().getClass().getName(), auth.getName(), auth.isAuthenticated(), auth.getAuthorities());
+        if (auth == null) return Optional.empty();
         if (auth.getPrincipal() instanceof CustomUserDetails cud) {
             return Optional.of(cud.getUser());
         }
@@ -32,7 +25,6 @@ public final class SecurityUtils {
         // auth.getName() (kullanıcı adı/e-posta) üzerinden DB'den yükle.
         String name = auth.getName();
         if (name != null && !name.isBlank() && !"anonymousUser".equals(name) && users != null) {
-            log.info("currentUser: fallback loading by email={}", name);
             return users.findByEmail(name);
         }
         return Optional.empty();
@@ -57,10 +49,6 @@ public final class SecurityUtils {
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails cud) {
             return cud.getUser();
         }
-        log.warn("requireUser(): principal CustomUserDetails değil (type={}, name={}). " +
-                "DB fallback'i için UserRepository inject edilmiş overload'ı kullanın.",
-                auth == null ? "null" : auth.getPrincipal().getClass().getName(),
-                auth == null ? "null" : auth.getName());
         throw new ApiException(ErrorCode.INSUFFICIENT_PERMISSIONS);
     }
 

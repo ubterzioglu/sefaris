@@ -1,22 +1,15 @@
 # Postgres profili — docker-compose / prod (rehber bölüm 18-19)
 spring:
   datasource:
-    # Aiven SSL zorunlu tutuyor (sslmode=require); Coolify env var'ında
-    # DATABASE_URL zaten bunu içeriyorsa bu default sadece local fallback.
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/sefaris_db?sslmode=require}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/sefaris_db?sslmode=disable}
     username: ${DATABASE_USER:sefaris}
     password: ${DATABASE_PASSWORD:sefaris}
     hikari:
-      # Aiven Free plan connection limit'i 20 — rolling update sırasında
-      # eski+yeni container aynı anda ayakta olduğu için pool küçük tutulmalı,
-      # yoksa "remaining connection slots" hatası tekrar eder.
       maximum-pool-size: ${DATABASE_POOL_SIZE:3}
       minimum-idle: ${DATABASE_POOL_MIN_IDLE:1}
       connection-timeout: 20000
       idle-timeout: 300000
       max-lifetime: 600000
-      # Eski/ölü bağlantıları erken tespit edip pool'dan atar, Aiven tarafında
-      # "idle" olarak sürünen leak'leri azaltır.
       keepalive-time: 180000
   jpa:
     hibernate:

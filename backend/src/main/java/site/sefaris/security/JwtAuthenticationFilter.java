@@ -18,8 +18,6 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
@@ -66,15 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             userDetails, null, userDetails.getAuthorities());
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                    if (log.isDebugEnabled()) {
-                        log.debug("JWT auth set: email={}, principalType={}, authorities={}",
-                                email, userDetails.getClass().getSimpleName(), userDetails.getAuthorities());
-                    }
                 }
             } catch (JwtException | IllegalArgumentException ex) {
                 // Geçersiz token → auth atanmaz, sonraki katman 401 döndürür
-            } catch (Exception ex) {
-                log.warn("JWT filter beklenmeyen hata: {}", ex.getMessage(), ex);
             }
         }
 
