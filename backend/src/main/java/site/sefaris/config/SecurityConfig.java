@@ -24,7 +24,6 @@ import site.sefaris.security.JwtAuthenticationFilter;
 import java.util.Arrays;
 import java.util.List;
 
-/** Stateless JWT güvenlik + RBAC (rehber bölüm 2, 5, 17). */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -43,18 +42,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                // CORS'u security'den ÖNCE devreye al (critical!)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         (request, response, authException) ->
                                 response.sendError(HttpStatus.UNAUTHORIZED.value(), "Oturum süresi doldu")))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CRITICAL: OPTIONS izinli
-                        .requestMatchers("/api/v1/auth/**", "/public/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // CRITICAL: OPTIONS preflight her zaman izinli ve ANONİM olmalı
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Actuator health endpoints — Coolify/Docker için açık bırak
+                        .requestMatchers("/actuator/health/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -62,17 +66,27 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        log.info("CORS Allowed Origins: {}", allowedOrigins);
+        log.info("CORS Allowed Origins raw value: {}", allowedOrigins);
+
+        // Null/empty kontrolü
+        if (allowedOrigins == null || allowedOrigins.isBlank()) {
+            log.warn("CORS_ALLOWED_ORIGINS boş! Default değerler kullanılıyor.");
+            allowedOrigins = "https://sefaris.site,https://www.sefaris.site,http://localhost:3000";
+        }
 
         List<String> origins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
 
+        log.info("CORS parsed origins: {}", origins);
+
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        config.setExposedHeaders(Arrays.asList("Authorization"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L); // Preflight cache 1 saat
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

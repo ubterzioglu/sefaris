@@ -15,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/** Her istekte Authorization: Bearer <token> başlığını doğrular. */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -31,27 +30,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        // ADIM 1: OPTIONS isteklerini filtreleme, doğrudan geç
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+
+        final String path = request.getRequestURI();
+        final String method = request.getMethod();
+
+        // DEBUG: Log her istek (deploy sonrası sorun çözmek için geçici)
+        // log.debug("JWT Filter: {} {}", method, path);
+
+        // OPTIONS preflight — CORS filter'ı halleder, burada geç
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Public path'lerde JWT kontrolü atla (performans)
+        if (path.startsWith("/api/v1/auth/") ||
+                path.startsWith("/public/") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/actuator/health")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
                 String email = jwtService.parse(token).get("email", String.class);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                var auth = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             } catch (JwtException | IllegalArgumentException ex) {
-                // geçersiz token → auth atanmaz, sonraki katman 401 döndürür
+                // Geçersiz token — auth atanmaz, sonraki katman 401 döndürür
+                // log.warn("Invalid JWT token: {}", ex.getMessage());
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }
