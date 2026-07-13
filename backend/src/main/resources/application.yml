@@ -30,6 +30,25 @@ spring:
 # spring.security.oauth2.client.registration.google.* eklenecek. Boş bırakılırsa
 # OAuth2ClientProperties doğrulaması patladığı için registration burada tanımlanmaz.
 
+# === Actuator — Docker/Coolify healthcheck için ===
+# liveness: sadece JVM/process ayakta mı (DB'den bağımsız) — Dockerfile HEALTHCHECK bunu kullanır
+# readiness: DB dahil her şey hazır mı — Coolify'ın proxy'ye trafik yönlendirme kararı için kullanılabilir
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
 # === Uygulama seviyesi ayarlar ===
 sefaris:
   jwt:
