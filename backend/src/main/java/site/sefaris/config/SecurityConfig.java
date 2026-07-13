@@ -50,9 +50,9 @@ public class SecurityConfig {
                                 response.sendError(HttpStatus.UNAUTHORIZED.value(), "Oturum süresi doldu")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // CRITICAL: /auth/** permitAll olmalı — login/register public
-                        .requestMatchers("/auth/**", "/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/actuator/health/**").permitAll()
+                        // Context-path /api/v1 olduğu için tam path yazılmalı
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/public/**", "/api/v1/v3/api-docs/**", "/api/v1/swagger-ui/**", "/api/v1/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/v1/actuator/health/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

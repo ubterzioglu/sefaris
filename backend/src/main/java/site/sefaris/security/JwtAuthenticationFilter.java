@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String path = request.getRequestURI();
         final String method = request.getMethod();
 
-        // OPTIONS preflight — CORS filter'ı halleder
+        // OPTIONS preflight — CORS filter'ı halleder, doğrudan geç
         if ("OPTIONS".equalsIgnoreCase(method)) {
             filterChain.doFilter(request, response);
             return;
@@ -65,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (JwtException | IllegalArgumentException ex) {
-                // Geçersiz token
+                // Geçersiz token → auth atanmaz, sonraki katman 401 döndürür
             }
         }
 
