@@ -50,9 +50,9 @@ public class SecurityConfig {
                                 response.sendError(HttpStatus.UNAUTHORIZED.value(), "Oturum süresi doldu")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Context-path /api/v1 olduğu için tam path yazılmalı
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/public/**", "/api/v1/v3/api-docs/**", "/api/v1/swagger-ui/**", "/api/v1/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/actuator/health/**").permitAll()
+                        // Spring Security 6 + MVC: MvcRequestMatcher context-path'i (/api/v1)
+                        // otomatik soyuyor, bu yüzden pattern'ler /api/v1 öneki olmadan yazılmalı.
+                        .requestMatchers("/auth/**", "/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health/**", "/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
