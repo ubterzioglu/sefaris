@@ -42,7 +42,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CORS'u security'den ÖNCE devreye al (critical!)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,10 +49,9 @@ public class SecurityConfig {
                         (request, response, authException) ->
                                 response.sendError(HttpStatus.UNAUTHORIZED.value(), "Oturum süresi doldu")))
                 .authorizeHttpRequests(auth -> auth
-                        // CRITICAL: OPTIONS preflight her zaman izinli ve ANONİM olmalı
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**", "/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Actuator health endpoints — Coolify/Docker için açık bırak
+                        // CRITICAL: /auth/** permitAll olmalı — login/register public
+                        .requestMatchers("/auth/**", "/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -68,7 +66,6 @@ public class SecurityConfig {
 
         log.info("CORS Allowed Origins raw value: {}", allowedOrigins);
 
-        // Null/empty kontrolü
         if (allowedOrigins == null || allowedOrigins.isBlank()) {
             log.warn("CORS_ALLOWED_ORIGINS boş! Default değerler kullanılıyor.");
             allowedOrigins = "https://sefaris.site,https://www.sefaris.site,http://localhost:3000";
@@ -86,7 +83,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         config.setExposedHeaders(Arrays.asList("Authorization"));
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L); // Preflight cache 1 saat
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

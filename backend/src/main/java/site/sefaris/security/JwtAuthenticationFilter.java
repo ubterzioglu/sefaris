@@ -34,21 +34,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String path = request.getRequestURI();
         final String method = request.getMethod();
 
-        // DEBUG: Log her istek (deploy sonrası sorun çözmek için geçici)
-        // log.debug("JWT Filter: {} {}", method, path);
-
-        // OPTIONS preflight — CORS filter'ı halleder, burada geç
+        // OPTIONS preflight — CORS filter'ı halleder
         if ("OPTIONS".equalsIgnoreCase(method)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Public path'lerde JWT kontrolü atla (performans)
+        // Public path'lerde JWT kontrolü atla
+        // Context-path /api/v1 olduğu için path /api/v1/auth/... şeklinde gelir
         if (path.startsWith("/api/v1/auth/") ||
-                path.startsWith("/public/") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/swagger-ui") ||
-                path.startsWith("/actuator/health")) {
+                path.startsWith("/api/v1/public/") ||
+                path.startsWith("/api/v1/v3/api-docs") ||
+                path.startsWith("/api/v1/swagger-ui") ||
+                path.startsWith("/api/v1/actuator/health")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -67,8 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (JwtException | IllegalArgumentException ex) {
-                // Geçersiz token — auth atanmaz, sonraki katman 401 döndürür
-                // log.warn("Invalid JWT token: {}", ex.getMessage());
+                // Geçersiz token
             }
         }
 
